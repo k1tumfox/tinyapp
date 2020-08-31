@@ -11,6 +11,11 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+//added route/endpoint
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
+
 //added route/endpoint to access JSON string rep urlDatabase object
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
