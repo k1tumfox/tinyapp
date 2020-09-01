@@ -13,6 +13,14 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+app.get("/urls", (req, res) => {
+  let templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
+});
+//When sending variables to an EJS template, they must be sent
+//inside an object, so that we can use the key of that variable
+//to access the data within our template.
+
 //added route/endpoint
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
