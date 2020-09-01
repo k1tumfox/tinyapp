@@ -30,7 +30,7 @@ app.get("/urls", (req, res) => {
 //to access the data within our template.
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");//req.body.longURL?...which can be stored in urlDatabase
+  res.render("urls_new");
 });
 
 app.get("/urls/:shortURL", (req, res) => {  
@@ -72,6 +72,11 @@ app.post("/urls", (req, res) => {
   console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
