@@ -21,6 +21,12 @@ app.get("/urls", (req, res) => {
 //inside an object, so that we can use the key of that variable
 //to access the data within our template.
 
+app.get("/urls/:shortURL", (req, res) => {  //RESUME HERE
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  res.render("urls_show", templateVars); 
+});
+
+
 //added route/endpoint
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
