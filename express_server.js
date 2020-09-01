@@ -9,7 +9,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan('dev'));//shows every route
 
 function generateRandomString() {
-  Math.random().toString(36).substring(2,8);
+  return Math.random().toString(36).substring(2,8);
 }
 
 const urlDatabase = {
@@ -33,7 +33,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");//req.body.longURL?...which can be stored in urlDatabase
 });
 
-app.get("/urls/:shortURL", (req, res) => {  //RESUME HERE
+app.get("/urls/:shortURL", (req, res) => {  
   let templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL] 
@@ -41,6 +41,10 @@ app.get("/urls/:shortURL", (req, res) => {  //RESUME HERE
   res.render("urls_show", templateVars); 
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
 
 //added route/endpoint
 app.get("/hello", (req, res) => {
@@ -62,8 +66,12 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const shortURL = generateRandomString();
+  console.log(req.body);  // Log the POST request body to the console ??------
+  urlDatabase[shortURL] = req.body.longURL;
+  console.log(urlDatabase);
+  res.redirect(`/urls/${shortURL}`);
+  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
 app.listen(PORT, () => {
