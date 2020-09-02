@@ -5,10 +5,10 @@ const bodyParser = require("body-parser");
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 
-app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));//shows every route
 app.use(cookieParser());
+app.set("view engine", "ejs");
 
 function generateRandomString() {
   return Math.random().toString(36).substring(2,8);
@@ -19,31 +19,51 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+app.get("/register", (req, res) => { //registration page
+  let templateVars = {
+    user: users[req.cookies['user_id']],
+    // username: req.cookies["username"]
+  }
+  res.render("urls_reg", templateVars);
+});
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-app.get("/urls", (req, res) => {
+app.get("/urls", (req, res) => {//@#$%  id: users[userId]
   let templateVars = { 
-    username: req.cookies["username"],
+    user: users[req.cookies['user_id']], //tried exception of req.cookie instead of cookies
+    // username: req.cookies["username"],
     urls: urlDatabase 
   };
   res.render("urls_index", templateVars);
 });
-//When sending variables to an EJS template, they must be sent
-//inside an object, so that we can use the key of that variable
-//to access the data within our template.
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"]
+    user: users[req.cookies['user_id']],
+    // username: req.cookies["username"]
   }
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {  
   let templateVars = { 
-    username: req.cookies["username"],
+    // username: req.cookies["username"],
+    user: users[req.cookies['user_id']],
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL] 
   };
@@ -55,25 +75,9 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-//added route/endpoint
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
 
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
-});
- 
-app.get("/fetch", (req, res) => {
-  res.send(`a = ${a}`);
-});
 
-//added route/endpoint to access JSON string rep urlDatabase object
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-// POSTS ------------------------------------------
+// -------------------------POSTS -----------------------------
 app.post("/login", (req, res) => {//COOKIE
   res.cookie('username', `${req.body.username}`);
   res.redirect("/urls");
@@ -81,6 +85,19 @@ app.post("/login", (req, res) => {//COOKIE
 
 app.post("/logout", (req, res) => {//COOKIE
   res.clearCookie('username', `${req.body.username}`);
+  res.redirect("/urls");
+});
+
+
+app.post("/register", (req, res) => {//register page
+  const userId = generateRandomString();
+  users[userId] = {
+    id: userId, 
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie('user_id', `${userId}`);
+  console.log(users);//tsting
   res.redirect("/urls");
 });
 
