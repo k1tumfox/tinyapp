@@ -4,10 +4,14 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
+// cosnt bcrypt = require('bcrypt');
+// const cookieSession = require('cookie-session');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));//shows every route
 app.use(cookieParser());
+
+
 app.set("view engine", "ejs");
 
 function generateRandomString() {
@@ -31,6 +35,14 @@ const users = {
     password: "dishwasher-funk"
   }
 }
+
+app.get("/login", (req, res) => {
+  // let templateVars = {
+  //   //email, password
+  // };
+  res.render("urls_login");
+});
+
 app.get("/register", (req, res) => { //registration page
   let templateVars = {
     user: users[req.cookies['user_id']], //user.email
@@ -78,7 +90,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 
 // -------------------------POSTS -----------------------------
-app.post("/login", (req, res) => {//COOKIE
+app.post("/login", (req, res) => {//update to acct urls_login
   res.cookie('username', `${req.body.username}`);
   res.redirect("/urls");
 });
