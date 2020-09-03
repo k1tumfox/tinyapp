@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 // cosnt bcrypt = require('bcrypt');
 // const cookieSession = require('cookie-session');
+const checkEmail = require('./helpers/checkEmails');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));//shows every route
@@ -91,6 +92,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 // -------------------------POSTS -----------------------------
 app.post("/login", (req, res) => {//update to acct urls_login
+  users[req.body.email]; //lookup email in db
   res.cookie('username', `${req.body.username}`);
   res.redirect("/urls");
 });
@@ -109,13 +111,18 @@ app.post("/register", (req, res) => {//register page
     return res.statusCode = 400;
   } 
   
-  for (let key in users) {
-    // console.log(users[key]);
-    if (users[key].email === req.body.email) {
-      console.log("that email is already registered!");//tst
-      return res.statusCode = 400;
-    }
-  } 
+  if (checkEmail(users, req)) {
+    console.log("that email is already registered!");//tst
+    return res.statusCode = 400;
+  }
+
+  // for (let key in users) {         //moved to helper dir
+  //   // console.log(users[key]);
+  //   if (users[key].email === req.body.email) {
+  //     console.log("that email is already registered!");//tst
+  //     return res.statusCode = 400;
+  //   }
+  // } 
 
   const userId = generateRandomString();
   users[userId] = {
