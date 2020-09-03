@@ -33,7 +33,7 @@ const users = {
 }
 app.get("/register", (req, res) => { //registration page
   let templateVars = {
-    user: users[req.cookies['user_id']],
+    user: users[req.cookies['user_id']], //user.email
     // username: req.cookies["username"]
   }
   res.render("urls_reg", templateVars);
@@ -90,14 +90,32 @@ app.post("/logout", (req, res) => {//COOKIE
 
 
 app.post("/register", (req, res) => {//register page
+  console.log(users);//tst show DB before
+  
+  if (!req.body.email || !req.body.password) {
+    console.log('no email, no pass given');//tst 
+    return res.statusCode = 400;
+  } 
+  
+  for (let key in users) {
+    // console.log(users[key]);
+    if (users[key].email === req.body.email) {
+      console.log("that email is already registered!");//tst
+      return res.statusCode = 400;
+    }
+  } 
+
   const userId = generateRandomString();
   users[userId] = {
     id: userId, 
     email: req.body.email,
     password: req.body.password
   };
-  res.cookie('user_id', `${userId}`);
-  console.log(users);//tsting
+
+  res.cookie('user_id', `${userId}`);//try userId without backtics
+  //or req.cookies['user_id']
+  
+  // console.log(users);//tst
   res.redirect("/urls");
 });
 
