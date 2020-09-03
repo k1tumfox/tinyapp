@@ -5,7 +5,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <% if (user) { %>
-      <h4><%= user.email %></h4>
+      <h4>Logged in As: <%= user.email %></h4>
       <form method="POST" action="/logout">
         <button>Log Out</button>
       </form>

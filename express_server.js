@@ -41,7 +41,11 @@ app.get("/login", (req, res) => {
   // let templateVars = {
   //   //email, password
   // };
-  res.render("urls_login");
+  let templateVars = {
+    user: users[req.cookies['user_id']], //user.email
+    // username: req.cookies["username"]
+  }
+  res.render("urls_login", templateVars);
 });
 
 app.get("/register", (req, res) => { //registration page
@@ -92,16 +96,21 @@ app.get("/u/:shortURL", (req, res) => {
 
 // -------------------------POSTS -----------------------------
 app.post("/login", (req, res) => {//update to acct urls_login
-  users[req.body.email]; //lookup email in db
-  res.cookie('username', `${req.body.username}`);
-  res.redirect("/urls");
+  for (let key in users) {
+    if (users[key].email === req.body.email) {
+      console.log("that email is already registered!");//tst
+      if (users[key].password !== req.body.password) {
+        console.log("Password does not match!");//tst
+        return res.statusCode = 403;
+      } else {
+        res.cookie('user_id', users[key].id);
+        res.redirect("/urls");
+        return;
+      }
+    } 
+  }
+  return res.statusCode = 400;
 });
-
-app.post("/logout", (req, res) => {//COOKIE
-  res.clearCookie('username', `${req.body.username}`);
-  res.redirect("/urls");
-});
-
 
 app.post("/register", (req, res) => {//register page
   console.log(users);//tst show DB before
@@ -116,14 +125,6 @@ app.post("/register", (req, res) => {//register page
     return res.statusCode = 400;
   }
 
-  // for (let key in users) {         //moved to helper dir
-  //   // console.log(users[key]);
-  //   if (users[key].email === req.body.email) {
-  //     console.log("that email is already registered!");//tst
-  //     return res.statusCode = 400;
-  //   }
-  // } 
-
   const userId = generateRandomString();
   users[userId] = {
     id: userId, 
@@ -135,6 +136,11 @@ app.post("/register", (req, res) => {//register page
   //or req.cookies['user_id']
   
   // console.log(users);//tst
+  res.redirect("/urls");
+});
+
+app.post("/logout", (req, res) => {//COOKIE
+  res.clearCookie('user_id', req.body.userId);
   res.redirect("/urls");
 });
 
