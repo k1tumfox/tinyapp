@@ -23,15 +23,15 @@ function generateRandomString() {
 }
 
 const urlDatabase = {
-  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandom2ID" },
-  "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID" }
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "user2RandomID" },
+  "9sm5xK": { longURL: "https://www.tsn.ca/soccer", userID: "userRandomID" }
 };
 
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: "3" //purple-monkey-dinosaur
   },
  "user2RandomID": {
     id: "user2RandomID", 
@@ -75,6 +75,10 @@ app.get("/urls", (req, res) => {//@#$%
     res.render("urls_index", templateVars);
   }
 });
+
+const urlsForUser = function(id) {
+  
+}
 
 app.get("/urls/new", (req, res) => {  //@#$%
   if (!req.session.user_id) {
