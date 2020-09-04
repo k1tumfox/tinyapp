@@ -69,12 +69,24 @@ app.get("/urls", (req, res) => {//@#$%  id: users[userId]
   res.render("urls_index", templateVars);
 });
 
-app.get("/urls/new", (req, res) => {
-  let templateVars = {
-    user: users[req.cookies['user_id']],
-    // username: req.cookies["username"]
+app.get("/urls/new", (req, res) => {  //@#$%
+  // console.log(req.cookies);
+  // console.log(users);
+  if (!req.body.email) {
+    res.redirect("/login");
+  } else {
+    let templateVars = {
+      user: users[req.cookies['user_id']],
+      // username: req.cookies["username"]
+    }
+    res.render("urls_new", templateVars);
   }
-  res.render("urls_new", templateVars);
+
+  // let templateVars = {
+  //   user: users[req.cookies['user_id']],
+  //   // username: req.cookies["username"]
+  // }
+  // res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {  
@@ -87,10 +99,10 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars); 
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
-});
+// app.get("/u/:shortURL", (req, res) => {
+//   const longURL = urlDatabase[req.params.shortURL];
+//   res.redirect(longURL);
+// });
 
 
 
