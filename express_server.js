@@ -23,8 +23,8 @@ function generateRandomString() {
 }
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandom2ID" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID" }
 };
 
 const users = { 
@@ -39,7 +39,7 @@ const users = {
     password: "dishwasher-funk"
   }
 }
-
+//--------------------------GETS---------------------------------
 app.get("/login", (req, res) => {
   // let templateVars = {
   //   //email, password
@@ -63,7 +63,7 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-app.get("/urls", (req, res) => {//@#$%  id: users[userId]
+app.get("/urls", (req, res) => {//@#$%  
   if (!req.session.user_id) {
     res.redirect("/login");
   } else {
@@ -94,24 +94,22 @@ app.get("/urls/:shortURL", (req, res) => {
     // username: req.cookies["username"],
     user: users[req.session['user_id']],
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL] 
+    longURL: urlDatabase[req.params.shortURL].longURL
   };
   res.render("urls_show", templateVars); 
 });
 
-// app.get("/u/:shortURL", (req, res) => {
-//   const longURL = urlDatabase[req.params.shortURL];
-//   res.redirect(longURL);
-// });
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL]["longURL"];
+  console.log("longURL", longURL);
+  res.redirect(longURL);
+});
 
 
 
 // -------------------------POSTS -----------------------------
 app.post("/login", (req, res) => {//update to acct urls_login
-  console.log("in login");
   for (let user in users) {
-    console.log("in loop");
-    console.log(users[user].email, req.body.email);
 
     if (users[user].email === req.body.email) {
       console.log("that email is already registered!");//tst
@@ -135,7 +133,7 @@ app.post("/register", (req, res) => {//register page
   
   if (!req.body.email || !req.body.password) {
     console.log('no email, no pass given');//tst 
-    return res.statusCode = 400;
+    return res.status(400).send("no email or pass provided");
   } 
   
   if (checkEmail(users, req)) {
@@ -158,22 +156,24 @@ app.post("/register", (req, res) => {//register page
 });
 
 app.post("/logout", (req, res) => {//COOKIE
-  // req.session = null;
-  res.clearCookie('user_id', req.body.userId);
+  req.session = null;
+  // res.clearCookie('user_id', req.session.user_id);
   res.redirect("/urls");
 });
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   // console.log(req.body);  // Log the POST request body to the console
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
   // console.log(urlDatabase);
+  console.log(urlDatabase);//tst
   res.redirect(`/urls/${shortURL}`);
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
 app.post("/urls/:id", (req, res) => {//update
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id] = { longURL: req.body.longURL, userID: req.session.user_id };
+  // console.log(urlDatabase);//tst
   res.redirect("/urls/:shortURL"); //this route res.renders "urls_show"
 });
 
