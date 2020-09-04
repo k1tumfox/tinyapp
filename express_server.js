@@ -5,14 +5,17 @@ const bodyParser = require("body-parser");
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 // cosnt bcrypt = require('bcrypt');
-// const cookieSession = require('cookie-session');
+const cookieSession = require('cookie-session');
 const checkEmail = require('./helpers/checkEmails');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));//shows every route
 app.use(cookieParser());
 
-
+app.use(cookieSession({
+  name: 'session',
+  keys: ["key1", "key2"],
+}));
 app.set("view engine", "ejs");
 
 function generateRandomString() {
@@ -42,7 +45,7 @@ app.get("/login", (req, res) => {
   //   //email, password
   // };
   let templateVars = {
-    user: users[req.cookies['user_id']], //user.email
+    user: users[req.session['user_id']], //user.email
     // username: req.cookies["username"]
   }
   res.render("urls_login", templateVars);
@@ -50,7 +53,7 @@ app.get("/login", (req, res) => {
 
 app.get("/register", (req, res) => { //registration page
   let templateVars = {
-    user: users[req.cookies['user_id']], //user.email
+    user: users[req.session['user_id']], //user.email
     // username: req.cookies["username"]
   }
   res.render("urls_reg", templateVars);
@@ -61,38 +64,35 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {//@#$%  id: users[userId]
-  let templateVars = { 
-    user: users[req.cookies['user_id']], //tried exception of req.cookie instead of cookies
-    // username: req.cookies["username"],
-    urls: urlDatabase 
-  };
-  res.render("urls_index", templateVars);
+  if (!req.session.user_id) {
+    res.redirect("/login");
+  } else {
+    let templateVars = { 
+      user: users[req.session['user_id']], //tried exception of req.cookie instead of cookies
+      // username: req.cookies["username"],
+      urls: urlDatabase 
+    };
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.get("/urls/new", (req, res) => {  //@#$%
-  // console.log(req.cookies);
-  // console.log(users);
-  if (!req.body.email) {
+  if (!req.session.user_id) {
     res.redirect("/login");
   } else {
     let templateVars = {
-      user: users[req.cookies['user_id']],
+      user: users[req.session['user_id']],
       // username: req.cookies["username"]
     }
     res.render("urls_new", templateVars);
   }
 
-  // let templateVars = {
-  //   user: users[req.cookies['user_id']],
-  //   // username: req.cookies["username"]
-  // }
-  // res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {  
   let templateVars = { 
     // username: req.cookies["username"],
-    user: users[req.cookies['user_id']],
+    user: users[req.session['user_id']],
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL] 
   };
@@ -108,20 +108,26 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // -------------------------POSTS -----------------------------
 app.post("/login", (req, res) => {//update to acct urls_login
-  for (let key in users) {
-    if (users[key].email === req.body.email) {
+  console.log("in login");
+  for (let user in users) {
+    console.log("in loop");
+    console.log(users[user].email, req.body.email);
+
+    if (users[user].email === req.body.email) {
       console.log("that email is already registered!");//tst
-      if (users[key].password !== req.body.password) {
+      if (users[user].password !== req.body.password) {
         console.log("Password does not match!");//tst
-        return res.statusCode = 403;
+        return res.status(403).send("Password mismatch");
       } else {
-        res.cookie('user_id', users[key].id);
+        console.log(users[user].id);
+        console.log(user);
+        req.session.user_id = users[user].id;
         res.redirect("/urls");
         return;
       }
     } 
   }
-  return res.statusCode = 400;
+  return res.status(403);
 });
 
 app.post("/register", (req, res) => {//register page
@@ -152,6 +158,7 @@ app.post("/register", (req, res) => {//register page
 });
 
 app.post("/logout", (req, res) => {//COOKIE
+  // req.session = null;
   res.clearCookie('user_id', req.body.userId);
   res.redirect("/urls");
 });
