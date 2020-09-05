@@ -126,7 +126,8 @@ app.post("/login", (req, res) => {//update to acct urls_login
 
     if (users[user].email === req.body.email) {
       console.log("that email is already registered!");//tst
-      if (users[user].password !== req.body.password) {
+      // if (users[user].password !== req.body.password) {
+      if (!bcrypt.compareSync(req.body.password, users[user].password)) {  //here
         console.log("Password does not match!");//tst
         return res.status(403).send("Password mismatch");
       } else {
@@ -163,6 +164,7 @@ app.post("/register", (req, res) => {//register page
     email: req.body.email,
     password: hashpw
   };
+  console.log(users[userId]); //tst
 
   res.cookie('user_id', `${userId}`);
   //or req.session.user_id = userId;
