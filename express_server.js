@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
-const checkEmail = require('./helpers/checkEmails');
+const { checkEmail, getUserByEmail } = require('./helpers/checkEmails');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));//shows every route
@@ -121,25 +121,15 @@ app.get("/whoops", (req, res) => {
 });
 
 // -------------------------POSTS -----------------------------
-app.post("/login", (req, res) => {//update to acct urls_login
-  for (let user in users) {
 
-    if (users[user].email === req.body.email) {
-      console.log("that email is already registered!");//tst
-      // if (users[user].password !== req.body.password) {
-      if (!bcrypt.compareSync(req.body.password, users[user].password)) {  //here
-        console.log("Password does not match!");//tst
-        return res.status(403).send("Password mismatch");
-      } else {
-        console.log(users[user].id);
-        console.log(user);
-        req.session.user_id = users[user].id;
-        res.redirect("/urls");
-        return;
-      }
-    } 
+app.post("/login", (req, res) => {//update to acct urls_login
+  const cUser = getUsersByEmail(req.body.email, users, req.body.password);//fcn call
+  if (!cUser) {
+    return res.status(403).send("That email is already registered, or password mismatch");
+  } else {
+    req.session.user_id = users[cUser].id;
+    res.redirect("/urls");
   }
-  return res.status(403);
 });
 
 app.post("/register", (req, res) => {//register page
