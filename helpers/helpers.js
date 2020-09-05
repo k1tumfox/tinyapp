@@ -12,10 +12,10 @@ const checkEmail = (data, req) => {
 const getUserByEmail = function(email, database, pass) {
   for (let user in database) {
     if (database[user].email === email && bcrypt.compareSync(pass, database[user].password)) {
-      return user;
+      return database[user];
     } 
   }
-  return false;
+  return undefined;
 };
 
 // app.post("/login", (req, res) => {//update to acct urls_login

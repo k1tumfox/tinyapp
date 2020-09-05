@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
-const { checkEmail, getUserByEmail } = require('./helpers/checkEmails');
+const { checkEmail, getUserByEmail } = require('./helpers/helpers');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));//shows every route
@@ -129,9 +129,8 @@ app.get("/whoops", (req, res) => {
 
 app.post("/login", (req, res) => {//update to acct urls_login
   const cUser = getUserByEmail(req.body.email, users, req.body.password);//fcn call
-  console.log(users.userRandomID.password);//tst
-  if (cUser) {
-    req.session.user_id = users[cUser].id;
+  if (cUser instanceof Object) {
+    req.session.user_id = cUser.id;
     res.redirect("/urls");
   } else {
     return res.status(403).send("That email is already registered, or password mismatch");
