@@ -39,4 +39,16 @@ const getUserByEmail = function(email, database, pass) {
 //   return res.status(403);
 // });
 
+// test modularity of helper function
+// app.post("/login", (req, res) => {//update to acct urls_login
+//   const cUser = getUserByEmail(req.body.email, users, req.body.password);//fcn call
+//   console.log(users.userRandomID.password);//tst
+//   if (cUser) {
+//     req.session.user_id = users[cUser].id;
+//     res.redirect("/urls");
+//   } else {
+//     return res.status(403).send("That email is already registered, or password mismatch");
+//   }
+// });
+
 module.exports = { checkEmail, getUserByEmail };

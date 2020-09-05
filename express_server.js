@@ -37,16 +37,21 @@ const urlDatabase = {
   "9sm5xK": { longURL: "https://www.tsn.ca/soccer", userID: "userRandomID" }
 };
 
+const p1 = "3"; // found in the req.params object
+const hashedP1 = bcrypt.hashSync(p1, 10);
+const p2 = "dishwasher-funk"; // found in the req.params object
+const hashedP2 = bcrypt.hashSync(p2, 10);
+
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "3" //purple-monkey-dinosaur
+    password: hashedP1 //purple-monkey-dinosaur
   },
  "user2RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "dishwasher-funk"
+    password: hashedP2
   }
 }
 //--------------------------GETS---------------------------------
@@ -123,12 +128,13 @@ app.get("/whoops", (req, res) => {
 // -------------------------POSTS -----------------------------
 
 app.post("/login", (req, res) => {//update to acct urls_login
-  const cUser = getUsersByEmail(req.body.email, users, req.body.password);//fcn call
-  if (!cUser) {
-    return res.status(403).send("That email is already registered, or password mismatch");
-  } else {
+  const cUser = getUserByEmail(req.body.email, users, req.body.password);//fcn call
+  console.log(users.userRandomID.password);//tst
+  if (cUser) {
     req.session.user_id = users[cUser].id;
     res.redirect("/urls");
+  } else {
+    return res.status(403).send("That email is already registered, or password mismatch");
   }
 });
 
