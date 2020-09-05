@@ -166,8 +166,8 @@ app.post("/register", (req, res) => {//register page
   };
   console.log(users[userId]); //tst
 
-  res.cookie('user_id', `${userId}`);
-  //or req.session.user_id = userId;
+  // res.cookie('user_id', `${userId}`);
+  req.session.user_id = userId;
   
   // console.log(users);//tst
   res.redirect("/urls");
