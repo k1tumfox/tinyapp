@@ -4,7 +4,7 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-// cosnt bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
 const checkEmail = require('./helpers/checkEmails');
 
@@ -100,12 +100,12 @@ app.get("/urls/new", (req, res) => {  //@#$%
 });
 
 app.get("/urls/:shortURL", (req, res) => {  //to go tiny page if it exists
-
+  // console.log("shortURL is:", req.params.shortURL); //:9sm5xK
   let templateVars = { 
     // username: req.cookies["username"],
     user: users[req.session['user_id']],
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL].longURL
+    longURL: urlDatabase[req.params.shortURL].longURL //FIX 9:10PM --------
   };
   res.render("urls_show", templateVars); 
 });
@@ -154,15 +154,18 @@ app.post("/register", (req, res) => {//register page
     return res.statusCode = 400;
   }
 
+  const pw = req.body.password;  //bcrypting password before placing in database
+  const hashpw = bcrypt.hashSync(pw, 10);
+
   const userId = generateRandomString();
   users[userId] = {
     id: userId, 
     email: req.body.email,
-    password: req.body.password
+    password: hashpw
   };
 
-  res.cookie('user_id', `${userId}`);//try userId without backtics
-  //or req.cookies['user_id']
+  res.cookie('user_id', `${userId}`);
+  //or req.session.user_id = userId;
   
   // console.log(users);//tst
   res.redirect("/urls");
@@ -189,8 +192,8 @@ app.post("/urls/:id", (req, res) => {//update long URL
   // console.log(req.params.id); //9sm5xK
   if (users[req.session.user_id].id === urlDatabase[req.params.id].userID) {
     urlDatabase[req.params.id] = { longURL: req.body.longURL, userID: req.session.user_id };
-    // console.log(urlDatabase);//tst
-    res.redirect("/urls/:shortURL"); //this route res.renders "urls_show"
+    console.log("redirecting to ", `/urls/:${req.params.id}`);// /urls/:9sm5xK
+    res.redirect(`/urls/${req.params.id}`); //this route res.renders "urls_show"
   } else {
     res.redirect("/whoops");
   }
