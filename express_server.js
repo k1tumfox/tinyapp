@@ -22,6 +22,16 @@ function generateRandomString() {
   return Math.random().toString(36).substring(2,8);
 }
 
+const urlsForUser = function(id) {
+  const userUrls = {}
+  for (let short in urlDatabase) {
+    if (urlDatabase[short].userID === id) {
+      userUrls[short] = { longURL: urlDatabase[short].longURL, userID: urlDatabase[short].userID };
+    }
+  }
+  return userUrls;
+}
+
 const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "user2RandomID" },
   "9sm5xK": { longURL: "https://www.tsn.ca/soccer", userID: "userRandomID" }
@@ -70,15 +80,11 @@ app.get("/urls", (req, res) => {//@#$%
     let templateVars = { 
       user: users[req.session['user_id']], //tried exception of req.cookie instead of cookies
       // username: req.cookies["username"],
-      urls: urlDatabase 
+      urls: urlsForUser(req.session['user_id'])  // formerly urlDatabase 
     };
     res.render("urls_index", templateVars);
   }
 });
-
-const urlsForUser = function(id) {
-  
-}
 
 app.get("/urls/new", (req, res) => {  //@#$%
   if (!req.session.user_id) {
@@ -93,7 +99,8 @@ app.get("/urls/new", (req, res) => {  //@#$%
 
 });
 
-app.get("/urls/:shortURL", (req, res) => {  
+app.get("/urls/:shortURL", (req, res) => {  //to go tiny page if it exists
+
   let templateVars = { 
     // username: req.cookies["username"],
     user: users[req.session['user_id']],
@@ -109,7 +116,9 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-
+app.get("/whoops", (req, res) => {
+  res.send("You can't do that.");
+});
 
 // -------------------------POSTS -----------------------------
 app.post("/login", (req, res) => {//update to acct urls_login
@@ -165,7 +174,7 @@ app.post("/logout", (req, res) => {//COOKIE
   res.redirect("/urls");
 });
 
-app.post("/urls", (req, res) => {
+app.post("/urls", (req, res) => { //new
   const shortURL = generateRandomString();
   // console.log(req.body);  // Log the POST request body to the console
   urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
@@ -175,15 +184,26 @@ app.post("/urls", (req, res) => {
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
-app.post("/urls/:id", (req, res) => {//update
-  urlDatabase[req.params.id] = { longURL: req.body.longURL, userID: req.session.user_id };
-  // console.log(urlDatabase);//tst
-  res.redirect("/urls/:shortURL"); //this route res.renders "urls_show"
+app.post("/urls/:id", (req, res) => {//update long URL
+  // console.log(req.session.user_id); //userRandomID
+  // console.log(req.params.id); //9sm5xK
+  if (users[req.session.user_id].id === urlDatabase[req.params.id].userID) {
+    urlDatabase[req.params.id] = { longURL: req.body.longURL, userID: req.session.user_id };
+    // console.log(urlDatabase);//tst
+    res.redirect("/urls/:shortURL"); //this route res.renders "urls_show"
+  } else {
+    res.redirect("/whoops");
+  }
+
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  if (users[req.session.user_id].id === urlDatabase[req.params.shortURL].userID) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls");
+  } else {
+    res.redirect("/whoops");
+  }
 });
 
 app.listen(PORT, () => {
