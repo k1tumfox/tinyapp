@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 const bcrypt = require('bcrypt');
-const { getUserByEmail } = require('../helpers/helpers.js');//may need to make into ../helper/helpers
+const { getUserByEmail } = require('../helpers/helpers.js');
 
 const p1 = "purple-monkey-dinosaur"; // found in the req.params object
 const hashedP1 = bcrypt.hashSync(p1, 10);
